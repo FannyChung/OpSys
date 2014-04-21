@@ -1,0 +1,51 @@
+#include<iostream>
+#include<windows.h>
+#include<stdio.h>
+#include<stdlib.h>
+using namespace std;
+//³õÊŒ»¯Êý×é²¿·Ö
+#define M 20
+#define K 2
+#define N 2
+int A[M][K] = { { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 } };
+int B[K][N] = { { 8, 7 }, { 5, 4 } };
+int C[M][N];
+struct v{
+	int i;
+	int j;
+};
+DWORD WINAPI calculate(LPVOID d){
+	struct v* data = (struct v*)d;
+	int a = data->i;
+	int b = data->j;
+	C[a][b] = 0;//初始化为0
+	for (int m = 0; m<K; m++){
+		C[a][b] += A[a][m] * B[m][b];//计算
+	}
+	return 0;
+}
+int main(){
+	HANDLE Thandles[M*N];
+	for (int i = 0; i < M; i++){
+		for (int j = 0; j < N; j++){
+			struct v *data = (struct v*) malloc(sizeof(struct v));//
+			data->i = i;
+			data->j = j;
+			//create thread passing it data as a parameter
+
+			DWORD ThreadId;
+			Thandles[i*N + j] = CreateThread(NULL, 0, calculate, data, 0, &ThreadId);//创建线程
+		}
+	}
+	WaitForMultipleObjects(M*N, Thandles, TRUE, INFINITE);//等待所有线程
+	for (int i = 0; i < M; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			CloseHandle(Thandles[i*N + j]);//关闭
+			cout << C[i][j] << "\t";//输出
+		}
+		cout << endl;
+	}
+	return 0;
+}
