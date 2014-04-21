@@ -1,0 +1,49 @@
+#include<iostream>
+#include<pthread.h>
+#include<stdio.h>
+#include<stdlib.h>
+using namespace std;
+#define M 20
+#define K 2
+#define N 2
+int A[M][K] = { { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 }, { 1, 4 }, { 2, 5 } };
+int B[K][N] = { { 8, 7 }, { 5, 4 } };
+int C[M][N];
+struct v{
+    int i;
+    int j;
+};
+void *calculate(void *d){
+    struct v*data=(struct v*)d;
+    int i=data->i;
+    int j=data->j;
+    C[i][j]=0;
+    for(int m=0;m<K;m++){
+        C[i][j]+=A[i][m]*B[m][j];
+    }
+    pthread_exit(0);
+}
+int main(){
+    pthread_t Thandles[M*N];
+    for(int i=0;i<M;i++){
+        for(int j=0;j<N;j++){
+            struct v *data=(struct v*) malloc(sizeof(struct v));
+            data->i=i;
+            data->j=j;
+            //create thread passing it data as a parameter
+            pthread_attr_t attr;
+            pthread_attr_init(&attr);
+            pthread_create(&Thandles[i*N+j],&attr,calculate,(void*)data);
+        }
+    }
+    for (int i = 0; i < M; ++i)
+    {
+        for (int j = 0; j < N; ++j)
+        {
+            pthread_join(Thandles[i*N+j],NULL);
+            cout<<C[i][j]<<"  ";
+        }
+        cout<<endl;
+    }
+    return 0;
+}
