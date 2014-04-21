@@ -1,0 +1,34 @@
+#include<iostream>
+#include<windows.h>
+#include<stdio.h>
+#include<atlstr.h>
+using namespace std;
+
+int main()
+{
+	cout << "要求第几个数？\n";
+	LPSTR str = new char(2);
+	cin >> str;
+
+	const char *pstrChildProcessExeFileName = "H:\\Child\\Debug\\Child.exe";
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+
+	ZeroMemory(&si, sizeof(si));
+	si.cb = sizeof(si);
+	ZeroMemory(&pi, sizeof(pi));
+
+
+	if (!CreateProcess(pstrChildProcessExeFileName,
+		str, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)){
+		fprintf(stderr, "Create Process Failed!");
+		printf("GetExitCodeProcess()Ê§°Ü  %d\n", GetLastError());
+		return -1;
+	}
+
+	WaitForSingleObject(pi.hProcess, INFINITE);
+	printf("Child Complete\n");
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+	return 0;
+}
